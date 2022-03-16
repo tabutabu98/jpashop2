@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -16,6 +18,24 @@ import javax.validation.constraints.NotEmpty;
 public class MemberApiController {
 
     private final MemberService memberService;
+
+    /**
+     * Entity를 외부에 노출한 케이스(금지)
+     */
+    @GetMapping("/v1/members")
+    public List<Member> membersV1() {
+        return memberService.findMembers();
+    }
+
+    @GetMapping("/v2/members")
+    public Result memberV2() {
+        List<Member> findMembers = memberService.findMembers();
+        List<MemberDto> collect = findMembers.stream()
+                .map(m -> new MemberDto(m.getName()))
+                .collect(Collectors.toList());
+
+        return new Result(collect.size(), collect);
+    }
 
     /**
      * 실무에서는 Entity를 파라미터러 바로 받지 않도록 주의(사실상 금지, 외부 노출 금지)
@@ -41,6 +61,15 @@ public class MemberApiController {
         memberService.update(id, request.getName());
         Member findMember = memberService.findOne(id);
         return new UpdateMemberResponse(findMember.getId(), findMember.getName());
+    }
+
+    /**
+     * DTO
+     */
+    @Data
+    @AllArgsConstructor
+    static class MemberDto {
+        private String name;
     }
 
     /**
@@ -71,5 +100,12 @@ public class MemberApiController {
     static class UpdateMemberResponse {
         private Long id;
         private String name;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        private int count;
+        private T data;
     }
 }
