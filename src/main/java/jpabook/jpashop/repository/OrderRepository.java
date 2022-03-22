@@ -30,8 +30,8 @@ public class OrderRepository {
 
     public List<Order> findAllByString(OrderSearch orderSearch) {
 
-            String jpql = "select o from Order o join o.member m";
-            boolean isFirstCondition = true;
+        String jpql = "select o from Order o join o.member m";
+        boolean isFirstCondition = true;
 
         //주문 상태 검색
         if (orderSearch.getOrderStatus() != null) {
@@ -124,6 +124,20 @@ public class OrderRepository {
                                 "join fetch oi.item i ", Order.class)
                 .setFirstResult(1)
                 .setMaxResults(100)
+                .getResultList();
+    }
+
+    /**
+     * V3.1
+     * ToOne관계는 fetch join 관계를 미리 잡아주는것이 좋다.
+     */
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery(
+                        "select o from Order o " +
+                                "join fetch o.member m " +
+                                "join fetch o.delivery d", Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 }

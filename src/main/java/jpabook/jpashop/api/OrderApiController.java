@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -60,6 +61,26 @@ public class OrderApiController {
     @GetMapping("/api/v3/orders")
     public List<OrderDto> ordersV3() {
         List<Order> orders = orderRepository.findAllWithItem();
+        List<OrderDto> result = orders.stream()
+                .map(OrderDto::new)
+                .collect(toList());
+        return result;
+    }
+
+    /**
+     * 지연로딩을 최적화하기 위해서는 default_batch_fetch_size, @BatchSize를 사용해야한다.
+     * hibernate.default_batch_fetch_size = 인쿼리의 개수
+     * hibernate.default_batch_fetch_size의 maxSize = 1000
+     */
+    @GetMapping("/api/v3.1/orders")
+    public List<OrderDto> ordersV3_page(@RequestParam(value = "offset", defaultValue = "0") int offset,
+                                        @RequestParam(value = "limit", defaultValue = "100") int limit) {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
+
+        for (int i = 0; i < 50; i++) {
+
+        }
+
         List<OrderDto> result = orders.stream()
                 .map(OrderDto::new)
                 .collect(toList());
