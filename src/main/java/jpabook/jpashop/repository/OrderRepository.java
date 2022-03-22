@@ -111,5 +111,20 @@ public class OrderRepository {
                         "join fetch o.delivery d", Order.class
         ).getResultList();
     }
+
+    /**
+     * 일대다 fetch join에서는 페이징을 할 수 없다. 주의
+     */
+    public List<Order> findAllWithItem() {
+        return em.createQuery(
+                        "select distinct o from Order o " +
+                                "join fetch o.member m " +
+                                "join fetch o.delivery d " +
+                                "join fetch o.orderItems oi " +
+                                "join fetch oi.item i ", Order.class)
+                .setFirstResult(1)
+                .setMaxResults(100)
+                .getResultList();
+    }
 }
 

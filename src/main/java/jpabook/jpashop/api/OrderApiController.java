@@ -51,6 +51,22 @@ public class OrderApiController {
     }
 
     /**
+     * V2와 V3의 API는 다르지 않다.
+     * 쿼리문만 다를 뿐이다.
+     * 중복조회에 대해서 중복제거(distinct)를 하게되면 값은 중복 제거를 할 수 있다.
+     * 하지만 sql자체에서는 join으로 인해 중복된 값들을 출력한다.
+     * 이로인해 페이징을 할 수 없게 된다.
+     */
+    @GetMapping("/api/v3/orders")
+    public List<OrderDto> ordersV3() {
+        List<Order> orders = orderRepository.findAllWithItem();
+        List<OrderDto> result = orders.stream()
+                .map(OrderDto::new)
+                .collect(toList());
+        return result;
+    }
+
+    /**
      * DTO 안에 Entity가 매핑되어 있음으로 이 방법을 사용하면 안된다.
      * OrderItem또한 DTO로 바꿔야 한다.
      */
