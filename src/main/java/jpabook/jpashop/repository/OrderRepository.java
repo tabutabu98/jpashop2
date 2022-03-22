@@ -97,7 +97,12 @@ public class OrderRepository {
     }
 
     /**
+     * v3
      * fetch join
+     * 내부에 원하는것만 가져와 성능 튜닝
+     * 많은 API에서 활용 가능
+     * 코드 작성 편함
+     * 성능은 v4보다는 떨어짐
      */
     public List<Order> findAllWithMemberDelivery() {
         return em.createQuery(
