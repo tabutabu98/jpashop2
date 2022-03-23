@@ -92,6 +92,9 @@ public class OrderApiController {
 
     /**
      * ToMany 관계를 별도로 처리
+     *
+     * V4는 코드가 단순하다. 특정 주문 한건만 조회하면 이 방식을 사용해도 성능이 잘 나온다. 예를 들어서
+     * 조회한 Order 데이터가 1건이면 OrderItem을 찾기 위한 쿼리도 1번만 실행하면 된다.
      */
     @GetMapping("/api/v4/orders")
     public List<OrderQueryDto> ordersV4() {
@@ -102,6 +105,12 @@ public class OrderApiController {
      * Query: 루트 1번, 컬렉션 1번
      * ToOne 관계들을 먼저 조회하고, 여기서 얻은 식별자 orderId로 ToMany 관계인 OrderItem을 한꺼번에 조회
      * MAP을 사용해서 매칭 성능 향상(O(1))
+     *
+     * V5는 코드가 복잡하다. 여러 주문을 한꺼번에 조회하는 경우에는 V4 대신에 이것을 최적화한 V5 방식을
+     * 사용해야 한다. 예를 들어서 조회한 Order 데이터가 1000건인데, V4 방식을 그대로 사용하면, 쿼리가 총
+     * 1 + 1000번 실행된다. 여기서 1은 Order 를 조회한 쿼리고, 1000은 조회된 Order의 row 수다. V5
+     * 방식으로 최적화 하면 쿼리가 총 1 + 1번만 실행된다. 상황에 따라 다르겠지만 운영 환경에서 100배
+     * 이상의 성능 차이가 날 수 있다.
      */
     @GetMapping("/api/v5/orders")
     public List<OrderQueryDto> ordersV5() {
@@ -114,6 +123,11 @@ public class OrderApiController {
      *  쿼리는 한번이지만 조인으로 인해 DB에서 애플리케이션에 전달하는 데이터에 중복 데이터가 추가되므로 상황에 따라 V5 보다 더 느릴 수 도 있다.
      *  애플리케이션에서 추가 작업이 크다.
      *  페이징 불가능(Order를 기준)
+     *
+     * V6는 완전히 다른 접근방식이다. 쿼리 한번으로 최적화 되어서 상당히 좋아보이지만, Order를 기준으로
+     * 페이징이 불가능하다. 실무에서는 이정도 데이터면 수백이나, 수천건 단위로 페이징 처리가 꼭 필요하므로,
+     * 이 경우 선택하기 어려운 방법이다. 그리고 데이터가 많으면 중복 전송이 증가해서 V5와 비교해서 성능
+     * 차이도 미비하다.
      */
     @GetMapping("/api/v6/orders")
     public List<OrderQueryDto> ordersV6() {
