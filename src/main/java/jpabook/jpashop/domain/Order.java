@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -20,8 +19,7 @@ import static javax.persistence.FetchType.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     @Column(name = "order_id")
     private Long id;
 
