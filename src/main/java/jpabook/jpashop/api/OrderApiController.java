@@ -97,6 +97,16 @@ public class OrderApiController {
     }
 
     /**
+     * Query: 루트 1번, 컬렉션 1번
+     * ToOne 관계들을 먼저 조회하고, 여기서 얻은 식별자 orderId로 ToMany 관계인 OrderItem을 한꺼번에 조회
+     * MAP을 사용해서 매칭 성능 향상(O(1))
+     */
+    @GetMapping("/api/v5/orders")
+    public List<OrderQueryDto> ordersV5() {
+        return orderQueryRepository.findAllByDto_optimization();
+    }
+
+    /**
      * DTO 안에 Entity가 매핑되어 있음으로 이 방법을 사용하면 안된다.
      * OrderItem또한 DTO로 바꿔야 한다.
      */
